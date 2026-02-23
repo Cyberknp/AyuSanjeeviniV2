@@ -1,4 +1,5 @@
 import math
+import os
 import random
 import shutil
 from pathlib import Path
@@ -13,8 +14,45 @@ from PIL import Image, ImageEnhance, ImageFilter, ImageOps
 # ============================================================================
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-DATASET_PATH = SCRIPT_DIR.parent / "Tooth dataset"
-OUTPUT_PATH = SCRIPT_DIR.parent / "Tooth dataset_augmented"
+
+
+def _resolve_dataset_path() -> Path:
+    override = os.environ.get("TOOTH_DATASET_PATH", "").strip()
+    if override:
+        return Path(override)
+
+    candidates = [
+        SCRIPT_DIR / "Tooth dataset",
+        SCRIPT_DIR / "Tooth_dataset",
+        SCRIPT_DIR / "Tooth Dataset",
+        SCRIPT_DIR / "Tooth dataset_augmented",
+        SCRIPT_DIR.parent / "Tooth dataset",
+        SCRIPT_DIR.parent / "Tooth_dataset",
+        SCRIPT_DIR.parent / "Tooth Dataset",
+        SCRIPT_DIR.parent / "dataset",
+        SCRIPT_DIR.parent / "datasets",
+    ]
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
+
+    return SCRIPT_DIR / "Tooth dataset"
+
+
+def _resolve_output_path(dataset_path: Path) -> Path:
+    override = os.environ.get("TOOTH_DATASET_OUTPUT_PATH", "").strip()
+    if override:
+        return Path(override)
+
+    base = dataset_path.parent
+    candidate = base / f"{dataset_path.name}_augmented"
+    if candidate == dataset_path:
+        candidate = base / f"{dataset_path.name}_augmented_out"
+    return candidate
+
+
+DATASET_PATH = _resolve_dataset_path()
+OUTPUT_PATH = _resolve_output_path(DATASET_PATH)
 
 VALID_EXTENSIONS = (".png", ".jpg", ".jpeg", ".bmp", ".tiff")
 SAVE_FORMAT = "JPEG"
@@ -65,6 +103,22 @@ def aug_contrast(img: Image.Image, low: float = 0.6, high: float = 1.4) -> Image
     """Randomly adjust contrast."""
     factor = random.uniform(low, high)
     return ImageEnhance.Contrast(img).enhance(factor)
+
+
+def aug_brightness_contrast_stretch(
+    img: Image.Image,
+    brightness_delta: float = 0.20,
+    cutoff_low: int = 0,
+    cutoff_high: int = 2,
+) -> Image.Image:
+    """
+    Random brightness adjustment (±brightness_delta) and contrast stretching.
+    Contrast stretching is applied via autocontrast with a small random cutoff.
+    """
+    factor = random.uniform(1.0 - brightness_delta, 1.0 + brightness_delta)
+    adjusted = ImageEnhance.Brightness(img).enhance(factor)
+    cutoff = random.randint(cutoff_low, cutoff_high)
+    return ImageOps.autocontrast(adjusted, cutoff=cutoff)
 
 
 def aug_saturation(
@@ -139,6 +193,11 @@ def _build_heavy_pipeline() -> list[tuple]:
         (aug_rotation, {"max_angle": 30.0}, 0.70),
         (aug_brightness, {"low": 0.55, "high": 1.50}, 0.70),
         (aug_contrast, {"low": 0.55, "high": 1.50}, 0.70),
+        (
+            aug_brightness_contrast_stretch,
+            {"brightness_delta": 0.20, "cutoff_low": 0, "cutoff_high": 2},
+            0.60,
+        ),
         (aug_saturation, {"low": 0.45, "high": 1.60}, 0.60),
         (aug_sharpness, {"low": 0.20, "high": 3.00}, 0.50),
         (aug_gaussian_blur, {"max_radius": 2.0}, 0.35),
@@ -159,6 +218,11 @@ def _build_mild_pipeline() -> list[tuple]:
         (aug_rotation, {"max_angle": 15.0}, 0.50),
         (aug_brightness, {"low": 0.80, "high": 1.25}, 0.50),
         (aug_contrast, {"low": 0.80, "high": 1.25}, 0.50),
+        (
+            aug_brightness_contrast_stretch,
+            {"brightness_delta": 0.20, "cutoff_low": 0, "cutoff_high": 1},
+            0.40,
+        ),
         (aug_saturation, {"low": 0.80, "high": 1.25}, 0.35),
         (aug_sharpness, {"low": 0.60, "high": 1.80}, 0.30),
         (aug_gaussian_blur, {"max_radius": 1.0}, 0.20),

@@ -14,7 +14,32 @@ from PIL import Image, ImageStat
 # ============================================================================
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-DATASET_PATH = SCRIPT_DIR.parent / "Tooth dataset"
+
+
+def _resolve_dataset_path() -> Path:
+    override = os.environ.get("TOOTH_DATASET_PATH", "").strip()
+    if override:
+        return Path(override)
+
+    candidates = [
+        SCRIPT_DIR / "Tooth dataset",
+        SCRIPT_DIR / "Tooth_dataset",
+        SCRIPT_DIR / "Tooth Dataset",
+        SCRIPT_DIR / "Tooth dataset_augmented",
+        SCRIPT_DIR.parent / "Tooth dataset",
+        SCRIPT_DIR.parent / "Tooth_dataset",
+        SCRIPT_DIR.parent / "Tooth Dataset",
+        SCRIPT_DIR.parent / "dataset",
+        SCRIPT_DIR.parent / "datasets",
+    ]
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
+
+    return SCRIPT_DIR / "Tooth dataset"
+
+
+DATASET_PATH = _resolve_dataset_path()
 VALID_EXTENSIONS = (".png", ".jpg", ".jpeg", ".gif", ".bmp", ".tiff")
 OUTPUT_DIR = SCRIPT_DIR / "analysis_output"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)

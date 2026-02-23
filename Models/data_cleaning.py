@@ -11,7 +11,32 @@ from PIL import Image
 
 # Resolve the dataset path relative to this script's location
 SCRIPT_DIR = Path(__file__).resolve().parent
-DATASET_PATH = SCRIPT_DIR.parent / "Tooth dataset"
+
+
+def _resolve_dataset_path() -> Path:
+    override = os.environ.get("TOOTH_DATASET_PATH", "").strip()
+    if override:
+        return Path(override)
+
+    candidates = [
+        SCRIPT_DIR / "Tooth dataset",
+        SCRIPT_DIR / "Tooth_dataset",
+        SCRIPT_DIR / "Tooth Dataset",
+        SCRIPT_DIR / "Tooth dataset_augmented",
+        SCRIPT_DIR.parent / "Tooth dataset",
+        SCRIPT_DIR.parent / "Tooth_dataset",
+        SCRIPT_DIR.parent / "Tooth Dataset",
+        SCRIPT_DIR.parent / "dataset",
+        SCRIPT_DIR.parent / "datasets",
+    ]
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
+
+    return SCRIPT_DIR / "Tooth dataset"
+
+
+DATASET_PATH = _resolve_dataset_path()
 
 # Number of images to sample per class for visual audit
 NUM_IMAGES_PER_CLASS = 5
