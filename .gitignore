@@ -55,6 +55,7 @@ data/
 raw_data/
 processed_data/
 Tooth dataset/
+/Tooth dataset_augmented/
 tooth_dataset/
 tooth/
 tooth_data/
