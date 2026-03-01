@@ -1,0 +1,48 @@
+# =============================================================================
+# MobileNetV2 Disease Classifier — Configuration
+# =============================================================================
+
+# Dataset
+dataset_dir: "../Models/Tooth_dataset_augmented"
+image_size: 224
+valid_extensions:
+  - ".jpg"
+  - ".jpeg"
+  - ".png"
+  - ".bmp"
+  - ".tiff"
+
+# Splits
+validation_split: 0.15
+test_split: 0.10
+
+# Training
+batch_size: 32
+epochs: 30
+learning_rate: 0.001
+fine_tune_epochs: 15
+fine_tune_lr: 0.0001
+fine_tune_at: 100          # Unfreeze layers from this index onward
+
+# Regularisation
+dropout_rate: 0.3
+
+# Reproducibility
+seed: 42
+
+# Callbacks
+early_stopping_patience: 7
+reduce_lr_patience: 3
+reduce_lr_factor: 0.5
+
+# Mixed precision
+mixed_precision: false
+
+# TensorBoard
+tensorboard: true
+tensorboard_log_dir: "logs/tensorboard"
+
+# Output directories
+checkpoint_dir: "checkpoints"
+export_dir: "exported_models"
+results_dir: "results"
