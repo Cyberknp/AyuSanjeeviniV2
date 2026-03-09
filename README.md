@@ -1,6 +1,6 @@
 # Ayusanjeevini Version 2
 
-Ayusanjeevini Frontend is the user-facing web application for the Ayusanjeevini platform, designed to facilitate healthcare services, appointment scheduling, and medical information delivery. This project forms the core client-side interface, interacting with backend services to provide a seamless experience for patients, doctors, and administrators.
+AyusanjeeviniV2 is the user-facing web application for the Ayusanjeevini platform, designed to facilitate healthcare services, appointment scheduling, and medical information delivery. This project forms the core client-side interface, interacting with backend services to provide a seamless experience for patients, doctors, and administrators.
 
 This project is a update version of the initial base model prototype , contains more accurate results ,more accurate detection and predictions .
 
