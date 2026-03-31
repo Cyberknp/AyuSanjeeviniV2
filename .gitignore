@@ -422,3 +422,10 @@ output/
 results/
 temp/
 tmp/
+
+# Disease classifier training artifacts
+disease_classifier/checkpoints/
+disease_classifier/results/
+disease_classifier/exported_models/
+disease_classifier/logs/
+disease_classifier/logs/tensorboard/
